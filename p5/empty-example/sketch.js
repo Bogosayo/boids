@@ -5,16 +5,19 @@ var pause_screen_tint_values = [0, 32, 24, 126];
 var pause_key_value = 32; // spacebar
 var line_key_value = 76; // L
 var circles_key_value = 67; // C
+var triangles_key_value = 84; // T
 var not_paused = true;
 var draw_lines = false;
 var draw_circles = true;
+var draw_triangles = false;
+var draw_boids = true;
 var canvas_height = 500;
 var canvas_width = 500;
 var pause_rectangle_height = 80;
 var pause_rectangle_width = 25;
 var fps = 60;
 var neighbor_distance = boid_radius * 2.5;
-var max_velocity = 3;
+var max_velocity = 7;
 var personal_space = boid_radius * 2;
 var frames_til_decision = 360;
 
@@ -152,8 +155,26 @@ function createNewBoid(id, new_x, new_y){
 	}
 
 	obj.draw = function(){
-		fill(this.color);
-		ellipse(this.pos.x, this.pos.y, boid_radius, boid_radius);
+		if(draw_circles){
+			fill(this.color);
+			ellipse(this.pos.x, this.pos.y, boid_radius, boid_radius);
+		}
+		if(draw_triangles){
+			var head_point = createVector(this.velocity.x, this.velocity.y);
+			head_point.normalize();
+			var left_point = createVector(head_point.y, -head_point.x);
+			var right_point = createVector(-left_point.x, -left_point.y);
+			head_point.mult(boid_radius);
+			var side_length = boid_radius / 4;
+			left_point.mult(side_length);
+			right_point.mult(side_length);
+			head_point.add(this.pos);
+			left_point.add(this.pos);
+			right_point.add(this.pos);
+
+			fill(this.color);
+			triangle(head_point.x, head_point.y, left_point.x, left_point.y, right_point.x, right_point.y);
+		}
 	}
 
 	return obj;
@@ -171,7 +192,7 @@ function createBoidContainer(){
 
 	obj.updateBoids = function(){
 		var number_boids = this.boids_array.length;
-		if(draw_circles){
+		if(draw_boids){
 			for(var i = 0; i < number_boids; i++){
 				this.boids_array[i].draw();
 			}
@@ -207,6 +228,13 @@ function keyPressed(){
 	}
 	if(keyCode === circles_key_value){
 		draw_circles = !draw_circles;
+		draw_triangles = false;
+		draw_boids = draw_circles;
+	}
+	if(keyCode === triangles_key_value){
+		draw_triangles = !draw_triangles;
+		draw_circles = false;
+		draw_boids = draw_triangles;
 	}
 }
 
