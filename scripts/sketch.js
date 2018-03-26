@@ -239,7 +239,8 @@ function keyPressed(){
 }
 
 function setup() {
-	createCanvas(canvas_height, canvas_width);
+	var canvas = createCanvas(canvas_height, canvas_width);
+    canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
 	frameRate(fps);
 	boid_container = createBoidContainer();
 	background_color = color(background_color_values);
