@@ -51,7 +51,7 @@ function createNewBoid(id, new_x, new_y){
 	obj.frame_count = 0;
 	obj.color = getRandomColor();
 
-	obj.findNeighbors = function(boids_array){
+	obj.findNeighbors = function(boids_array, line_container){
 		var neighbors = [];
 		var number_boids = boids_array.length;
 		for(var i = 0; i < number_boids; i++){
@@ -60,7 +60,7 @@ function createNewBoid(id, new_x, new_y){
 				if(v < neighbor_distance){
 					neighbors.push(boids_array[i]);
 					if(draw_lines){
-						line(this.pos.x, this.pos.y, boids_array[i].pos.x, boids_array[i].pos.y);
+						line_container.add(this.pos.x, this.pos.y, boids_array[i].pos.x, boids_array[i].pos.y);
 					}
 				}
 			}
@@ -140,8 +140,8 @@ function createNewBoid(id, new_x, new_y){
 		}
 	}
 
-	obj.move = function(boids_array){
-		var neighbors = this.findNeighbors(boids_array);
+	obj.move = function(boids_array, line_container){
+		var neighbors = this.findNeighbors(boids_array, line_container);
 		var v1 = this.steerToCenter(neighbors).div(4);
 		var v2 = this.steerClear(neighbors).div(1);
 		var v3 = this.steerSpeed(neighbors).div(1);
@@ -183,10 +183,35 @@ function createNewBoid(id, new_x, new_y){
 	return obj;
 }
 
+function createLineContainer(){
+	var obj = {};
+	obj.lines_array = [];
+	obj.total_lines = 0;
+
+	obj.empty = function(){
+		this.lines_array = [];
+		this.total_lines = 0;
+	}
+
+	obj.add = function(x1, y1, x2, y2){
+		this.lines_array.push([x1, y1, x2, y2]);
+		this.total_lines = this.total_lines + 1;
+	}
+
+	obj.draw = function(){
+		for(var i = 0; i < this.total_lines; i++){
+			line(this.lines_array[i][0], this.lines_array[i][1], this.lines_array[i][2], this.lines_array[i][3]);
+		}
+	}
+
+	return obj;
+}
+
 function createBoidContainer(){
 	var obj = {};
 	obj.boids_array = [];
 	obj.total_boids = 0;
+	obj.line_container = createLineContainer();
 
 	obj.addBoid = function(new_x, new_y){
 		this.total_boids = this.total_boids + 1;
@@ -194,15 +219,18 @@ function createBoidContainer(){
 	}
 
 	obj.updateBoids = function(){
-		var number_boids = this.boids_array.length;
 		if(draw_boids){
-			for(var i = 0; i < number_boids; i++){
+			for(var i = 0; i < this.total_boids; i++){
 				this.boids_array[i].draw();
 			}
 		}
+		if(draw_lines){
+			this.line_container.draw();
+		}
 		if(not_paused){
-			for(var i = 0; i < number_boids; i++){
-				this.boids_array[i].move(this.boids_array);
+			this.line_container.empty();
+			for(var i = 0; i < this.total_boids; i++){
+				this.boids_array[i].move(this.boids_array, this.line_container);
 			}
 		}
 	}
@@ -212,16 +240,13 @@ function createBoidContainer(){
 
 /*** (2) global variables ***/
 var boid_container;
+var line_container;
 var background_color;
 var pause_screen_tint;
 var pause_rectangle_left;
 var pause_rectangle_right;
 
 /*** (4) P5 functions ***/
-function mousePressed(){
-	boid_container.addBoid(mouseX, mouseY);
-}
-
 function mousePressed(){
 	boid_container.addBoid(mouseX, mouseY);
 }
@@ -253,6 +278,7 @@ function setup() {
     canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
 	frameRate(fps);
 	boid_container = createBoidContainer();
+	line_container = [];
 	background_color = color(background_color_values);
 	pause_screen_tint = color(pause_screen_tint_values);
 	pause_rectangle_left = [(canvas_width / 2) - (pause_rectangle_width * 1.5), (canvas_height / 2) - (pause_rectangle_height / 2), pause_rectangle_width, pause_rectangle_height];
