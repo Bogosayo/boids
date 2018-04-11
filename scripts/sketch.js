@@ -6,17 +6,19 @@ var pause_key_value = 32; // spacebar
 var line_key_value = 76; // L
 var circles_key_value = 67; // C
 var triangles_key_value = 84; // T
+var rapid_spawn_key_value = 82; // R
 var not_paused = true;
 var draw_lines = false;
 var draw_circles = true;
 var draw_triangles = false;
 var draw_boids = true;
-var canvas_height = 500;
-var canvas_width = 500;
+var rapid_spawn = false;
+var canvas_height = 700;
+var canvas_width = 1100;
 var pause_rectangle_height = 80;
 var pause_rectangle_width = 25;
 var fps = 60;
-var neighbor_distance = boid_radius * 2.5;
+var neighbor_distance = boid_radius * 4;
 var max_velocity = 7;
 var personal_space = boid_radius * 2;
 var frames_til_decision = 360;
@@ -214,10 +216,14 @@ var pause_screen_tint;
 var pause_rectangle_left;
 var pause_rectangle_right;
 
-/*** (4) P5 functions **
+/*** (4) P5 functions ***/
 function mousePressed(){
 	boid_container.addBoid(mouseX, mouseY);
-}*/
+}
+
+function mousePressed(){
+	boid_container.addBoid(mouseX, mouseY);
+}
 
 function keyPressed(){
 	if(keyCode === pause_key_value){
@@ -236,10 +242,13 @@ function keyPressed(){
 		draw_circles = false;
 		draw_boids = draw_triangles;
 	}
+	if(keyCode === rapid_spawn_key_value){
+		rapid_spawn = !rapid_spawn;
+	}
 }
 
 function setup() {
-	var canvas = createCanvas(canvas_height, canvas_width);
+	var canvas = createCanvas(canvas_width, canvas_height);
     canvas.position((windowWidth - width) / 2, (windowHeight - height) / 2);
 	frameRate(fps);
 	boid_container = createBoidContainer();
@@ -250,15 +259,15 @@ function setup() {
 }
 
 function draw() {
-	if(mouseIsPressed){
-	boid_container.addBoid(mouseX, mouseY);
-
+	if(mouseIsPressed && rapid_spawn){
+		boid_container.addBoid(mouseX, mouseY);
 	}
+
 	background(background_color);
 	boid_container.updateBoids();
 	if(!not_paused){
 		fill(pause_screen_tint);
-		rect(0, 0, canvas_height, canvas_width);
+		rect(0, 0, canvas_width, canvas_height);
 		fill(color(255));
 		rect(pause_rectangle_left[0], pause_rectangle_left[1], pause_rectangle_left[2], pause_rectangle_left[3], 20);
 		rect(pause_rectangle_right[0], pause_rectangle_right[1], pause_rectangle_right[2], pause_rectangle_right[3], 20);
