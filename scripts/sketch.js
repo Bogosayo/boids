@@ -47,6 +47,7 @@ function createNewBoid(id, new_x, new_y){
 	obj.pos = createVector(new_x, new_y);
 	obj.velocity = createVector(getRandomNumberInRange(-3, 3), getRandomNumberInRange(-3, 3));
 	obj.personal_max_velocity = max_velocity;
+	obj.personal_frames_til_decision = frames_til_decision + getRandomNumberInRange(-4,4) * getRandomNumberInRange(7,10);
 	obj.frame_count = 0;
 	obj.color = getRandomColor();
 
@@ -128,7 +129,7 @@ function createNewBoid(id, new_x, new_y){
 
 	obj.featureCreep = function(){
 		this.frame_count = this.frame_count + 1;
-		if(this.frame_count > frames_til_decision){
+		if(this.frame_count > this.personal_frames_til_decision){
 			this.frame_count = 0;
 			if(getRandomNumber(4) > 2){
 				this.personal_max_velocity = getRandomNumberInRange(Math.floor(max_velocity / 2), max_velocity);
@@ -153,7 +154,7 @@ function createNewBoid(id, new_x, new_y){
 		}
  		this.pos.add(this.velocity);
  		this.wrapAroundBorder();
- 		//this.featureCreep();
+ 		this.featureCreep();
 	}
 
 	obj.draw = function(){
